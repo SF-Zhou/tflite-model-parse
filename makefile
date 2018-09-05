@@ -5,11 +5,12 @@ build/tflite_model_parse: src/tflite_model_parse.cpp include/flatbuffers/flatbuf
 
 run: build/tflite_model_parse
 	./build/tflite_model_parse
+	diff ./model/mnist.tflite ./build/mnist_mutated.tflite || echo tf-lite model is mutated!
 
 include/:
 	mkdir -p include
 
-include/flatbuffers/: include/ flatbuffers/
+include/flatbuffers/flatbuffers.h: include/ build/flatc
 	mkdir -p include/flatbuffers
 	cp flatbuffers/include/flatbuffers/base.h include/flatbuffers
 	cp flatbuffers/include/flatbuffers/flatbuffers.h include/flatbuffers

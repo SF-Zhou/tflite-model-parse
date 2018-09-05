@@ -27,9 +27,9 @@ int main() {
   infile.read(data.data(), length);
   infile.close();
 
-  auto &model = *tflite::GetModel(data.data());
-  auto &graph_list = *model.subgraphs();
-  auto &graph = *graph_list[0];
+  auto &model = *tflite::GetMutableModel(data.data());
+  auto &graph_list = *model.mutable_subgraphs();
+  auto &graph = *graph_list.GetMutableObject(0);
 
   auto &inputs = *graph.inputs();
   printf("Inputs Count: %d\n", inputs.Length());
@@ -41,30 +41,39 @@ int main() {
   auto output_index = outputs[0];
   printf("First Output Tensor Index: %d\n", output_index);
 
-  auto &tensors = *graph.tensors();
+  auto &tensors = *graph.mutable_tensors();
   printf("Tensors Count: %d\n", tensors.Length());
 
-  auto &input_tensor = *tensors[input_index];
+  auto &input_tensor = *tensors.GetMutableObject(input_index);
   printf("Input Tensor Name: %s\n", input_tensor.name()->c_str());
   auto &input_shape = *input_tensor.shape();
   printf("Input Shape: ");
   PrintVector(input_shape);
 
-  auto &output_tensor = *tensors[output_index];
+  auto &output_tensor = *tensors.GetMutableObject(output_index);
   printf("Output Tensor Name: %s\n", output_tensor.name()->c_str());
   auto &output_shape = *output_tensor.shape();
   printf("Output Shape: ");
   PrintVector(output_shape);
 
-  auto &input_quantization = *input_tensor.quantization();
+  auto &input_quantization = *input_tensor.mutable_quantization();
+  auto &scales = *input_quantization.mutable_scale();
   printf("Input Quanzation Scales: ");
-  PrintVector(*input_quantization.scale());
+  PrintVector(scales);
+  scales.Mutate(0, 2.3333);
+  printf("Input Quanzation Scales (Mutated): ");
+  PrintVector(scales);
   printf("Input Quanzation Zero-Points: ");
   PrintVector(*input_quantization.zero_point());
 
-  auto &output_quantization = *output_tensor.quantization();
+  auto &output_quantization = *output_tensor.mutable_quantization();
   printf("Output Quanzation Scales: ");
   PrintVector(*output_quantization.scale());
   printf("Output Quanzation Zero-Points: ");
   PrintVector(*output_quantization.zero_point());
+
+  std::ofstream outfile;
+  outfile.open("./build/mnist_mutated.tflite", std::ios::binary | std::ios::out);
+  outfile.write(data.data(), length);
+  outfile.close();
 }
