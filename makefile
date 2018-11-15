@@ -27,4 +27,4 @@ build/flatc:
 
 build/schema.fbs:
 	mkdir -p build
-	wget https://github.com/tensorflow/tensorflow/raw/master/tensorflow/contrib/lite/schema/schema.fbs -P build
+	wget https://github.com/tensorflow/tensorflow/raw/master/tensorflow/lite/schema/schema.fbs -P build
